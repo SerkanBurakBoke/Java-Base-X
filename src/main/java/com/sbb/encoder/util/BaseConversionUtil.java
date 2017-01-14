@@ -2,10 +2,13 @@ package com.sbb.encoder.util;
 
 import java.nio.ByteBuffer;
 
+import org.apache.log4j.Logger;
+
 public class BaseConversionUtil {
 	private char[] charArrayMap;
 	private String baseCharMap;
 	ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
+	Logger logger = Logger.getLogger(this.getClass());
 
 	public BaseConversionUtil(String baseCharMap) {
 		setBaseCharMap(baseCharMap);
@@ -47,9 +50,8 @@ public class BaseConversionUtil {
 	public byte[] convert2Byte(long result, int byteCount) {
 		byte[] longBytes = long2Bytes(result);
 		byte[] bytes = new byte[byteCount];
-
-		for (int i = 2 + byteCount; i >= 3; i--) {
-			bytes[byteCount + 2 - i] = longBytes[i];
+		for (int i = 7; i > 7 - byteCount; i--) {
+			bytes[7 - i] = longBytes[i];
 		}
 		return bytes;
 	}
@@ -82,5 +84,17 @@ public class BaseConversionUtil {
 
 	public void setCharArrayMap(char[] charArrayMap) {
 		this.charArrayMap = charArrayMap;
+	}
+	
+	public void printByteArray(byte[] bytes){
+	    StringBuilder sb = new StringBuilder();
+	    for (byte b : bytes) {
+	        sb.append(byte2String(b));
+	    }
+	    logger.info(sb.toString());
+	}
+
+	private String byte2String(byte b) {
+		return "0x" + String.format("%02X ", b )+ " ";
 	}
 }

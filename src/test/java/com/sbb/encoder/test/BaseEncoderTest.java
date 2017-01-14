@@ -5,20 +5,25 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sbb.encoder.decoder.BaseDecoder;
 import com.sbb.encoder.encoder.BaseEncoder;
+import com.sbb.encoder.properties.BaseProperties;
+import com.sbb.encoder.util.BaseConversionUtil;
 import com.sbb.encoder.util.FileUtil;
 
 public class BaseEncoderTest {
+	static Logger logger = Logger.getLogger(BaseEncoderTest.class);
 
 	public String getFileName() {
 		return "data/ec1.rar";
 	}
-
+	private static BaseProperties baseProperties = new BaseProperties();
+	
 	@Before
 	public void setUpBeforeClass() throws Exception {
 		testEncoding();
@@ -35,7 +40,7 @@ public class BaseEncoderTest {
 	@Test
 	public void verify4String() throws Exception {
 		String testStr = "test string";
-		String decodeStr = new String(new BaseDecoder().decode(new BaseEncoder().encode(testStr)));
+		String decodeStr = new String(new BaseDecoder() .decode(new BaseEncoder().encode(testStr)));
 		Assert.assertTrue(testStr.equals(decodeStr));
 	}
 	
@@ -43,8 +48,47 @@ public class BaseEncoderTest {
 	public void verify4ByteArray() throws Exception {
 		byte[] bytes = { (byte)0x99, (byte)0x83, (byte)0x52, (byte)0x46, (byte)0x47, (byte)0xAB, (byte)0x6C, (byte)0x79, (byte)0xF1, (byte)0x3C, (byte)0xAC, (byte)0x16 };
 		
-		String encodedString = new BaseEncoder().encode(bytes);
-		byte[]  newBytes = new BaseDecoder().decode(encodedString);
+		BaseEncoder encoder = new BaseEncoder();
+		encoder.setBaseProperties(baseProperties);
+		BaseDecoder decoder = new BaseDecoder();
+		decoder.setBaseProperties(baseProperties);
+
+		printByteArray(bytes);
+		String encodedString = encoder.encode(bytes);
+		logger.info(encodedString);
+		byte[]  newBytes = decoder.decode(encodedString);
+		printByteArray(newBytes);
+		boolean isOk = true;
+		try {
+			for(int i = 0; i<bytes.length; i++){
+				if(bytes[i] != newBytes[i]){
+					isOk = false;
+					break;
+				}
+			}
+				
+		} catch (Exception e) {
+			isOk = false;
+		}
+		
+		
+		Assert.assertTrue(isOk);
+	}
+	
+	@Test
+	public void verify4ByteZero() throws Exception {
+		byte[] bytes = { (byte)0x99, (byte)0x83, (byte)0x52, (byte)0x46, (byte)0x47, (byte)0xAB, (byte)0x6C, (byte)0x79, (byte)0xF1, (byte)0x3C, (byte)0x00, (byte)0x00 };
+		
+		BaseEncoder encoder = new BaseEncoder();
+		encoder.setBaseProperties(baseProperties);
+		BaseDecoder decoder = new BaseDecoder();
+		decoder.setBaseProperties(baseProperties);
+
+		printByteArray(bytes);
+		String encodedString = encoder.encode(bytes);
+		logger.info(encodedString);
+		byte[]  newBytes = decoder.decode(encodedString);
+		printByteArray(newBytes);
 		boolean isOk = true;
 		try {
 			for(int i = 0; i<bytes.length; i++){
@@ -166,14 +210,6 @@ public class BaseEncoderTest {
 	}
 	
 	public void printByteArray(byte[] bytes){
-	    StringBuilder sb = new StringBuilder();
-	    for (byte b : bytes) {
-	        sb.append(byte2String(b));
-	    }
+		new BaseConversionUtil(baseProperties.getBaseCharMap()).printByteArray(bytes);
 	}
-
-	private String byte2String(byte b) {
-		return "0x" + String.format("%02X ", b )+ " ";
-	}
-
 }

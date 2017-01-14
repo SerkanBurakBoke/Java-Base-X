@@ -1,11 +1,16 @@
 package com.sbb.encoder.properties;
 
+import org.apache.log4j.Logger;
+
+import com.sbb.encoder.exception.EncoderValidationException;
+
 public class BaseProperties {
 	private int byteCount = 5;
-	private int base = 29;
-	private String baseCharMap = "0123456789ABCDEFGHIJKLMNOPRST";
+	private int base = 36;
+	private String baseCharMap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	private int fileReadByteBuffer = 1024;
 	private int fileReadMapcharCountBuffer = 1024;
+	Logger logger = Logger.getLogger(this.getClass());
 
 	public int getFileReadByteBuffer() {
 		return fileReadByteBuffer;
@@ -27,7 +32,9 @@ public class BaseProperties {
 		return byteCount;
 	}
 
-	public void setByteCount(int byteCount) {
+	public void setByteCount(int byteCount) throws EncoderValidationException {
+		if(byteCount<1 || byteCount>7)
+			throw new EncoderValidationException("byteCount must be between 1 and 7");
 		this.byteCount = byteCount;
 	}
 
